@@ -396,23 +396,29 @@ namespace Harpan
             return Färghögar.Any(x => x.Count > 2);
         }
 
-        private void TaNyttKort(Spelkort kort)
+        private void TaNyttKort(Spelkort kort) //Fixa att den flytta nocard till först
         {
             if (Spelplan.Where(x => x.Högtyp == Högtyp.Tahög).Count() > 1)
             {
                 kort.Högtyp = Högtyp.Kasthög; // Sätt Högtyp till Kasthög
                 kort.ÄrVisad = true;
+                Spelplan.Remove(kort); // Ta bort kortet från Tahög
+                Spelplan.Add(kort); // Lägg till kortet i Spelplan så att det liger sist i listan
                 RensaBorders(kort); // Rensa tidigare valda borders
             }
             else
             {
-                while (Spelplan.Where(x => x.Högtyp == Högtyp.Kasthög).Count() > 1)
+                var templista = Spelplan.Where(x => x.Högtyp == Högtyp.Kasthög).ToList();
+                while (templista.Count > 0)
                 {
-                    var kastkort = Spelplan.LastOrDefault(x => x.Högtyp == Högtyp.Kasthög);
+                    var kastkort = templista.LastOrDefault(x => x.Högtyp == Högtyp.Kasthög);
                     if (kastkort != null || kastkort != default)
                     {
                         kastkort.Högtyp = Högtyp.Tahög; // Sätt Högtyp till Tahög
                         kastkort.ÄrVisad = false;
+                        Spelplan.Remove(kastkort); // Ta bort kortet från Kasthög
+                        Spelplan.Add(kastkort); // Lägg till kortet i Spelplan så att det liger sist i listan
+                        templista.Remove(kastkort); // Ta bort kortet från temporär lista
                     }
 
                 }

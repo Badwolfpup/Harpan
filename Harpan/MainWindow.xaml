@@ -32,6 +32,7 @@
                             <MultiBinding Converter="{StaticResource FiltreraSpelhögarConverter}">
                                 <Binding Path="." />
                                 <Binding Path="DataContext.Spelplan" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                <Binding Path="Data" Source="{StaticResource ForceraUIUppdatering}"/>
                             </MultiBinding>
                         </ItemsControl.ItemsSource>
                         <ItemsControl.ItemTemplate>
