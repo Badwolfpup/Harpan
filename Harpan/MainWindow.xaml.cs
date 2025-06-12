@@ -78,107 +78,34 @@ namespace Harpan
         }
 
 
-        private ObservableCollection<Spelkort> _tahög;
-        public ObservableCollection<Spelkort> Tahög
-        {
-            get { return _tahög; }
-            set
-            {
-                if (_tahög != value)
-                {
-                    _tahög = value;
-                    OnPropertyChanged(nameof(Tahög));
-                }
-            }
-        }
-
-        private ObservableCollection<Spelkort> _kasthög;
-        public ObservableCollection<Spelkort> Kasthög
-        {
-            get { return _kasthög; }
-            set
-            {
-                if (_kasthög != value)
-                {
-                    _kasthög = value;
-                    OnPropertyChanged(nameof(Kasthög));
-                }
-            }
-        }
-
-        private ObservableCollection<ObservableCollection<Spelkort>> _färghögar;
-        public ObservableCollection<ObservableCollection<Spelkort>> Färghögar
-        {
-            get { return _färghögar; }
-            set
-            {
-                if (_färghögar != value)
-                {
-                    _färghögar = value;
-                    OnPropertyChanged(nameof(Färghögar));
-                }
-            }
-        }
-
-        private ObservableCollection<ObservableCollection<Spelkort>> _spelhögar;
-        public ObservableCollection<ObservableCollection<Spelkort>> Spelhögar
-        {
-            get { return _spelhögar; }
-            set
-            {
-                if (_spelhögar != value)
-                {
-                    _spelhögar = value;
-                    OnPropertyChanged(nameof(Spelhögar));
-                }
-            }
-        }
-
-
 
         public MainWindow()
         {
             InitializeComponent();
             DataContext = this;
-            Tahög = new ObservableCollection<Spelkort>();
-            Kasthög = new ObservableCollection<Spelkort>();
-            Färghögar = new ObservableCollection<ObservableCollection<Spelkort>>();
-           
-            Spelhögar = new ObservableCollection<ObservableCollection<Spelkort>>();
+            Spelhögstyper = new ObservableCollection<string> { "Tahög", "Kasthög", "", "Hjärterhög", "Spaderhög", "Ruterhög", "Klöverhög",
+             "Spelhög1", "Spelhög2", "Spelhög3", "Spelhög4", "Spelhög5", "Spelhög6", "Spelhög7" };
             InitieraOmgång();
-
         }
 
 
         private void InitieraOmgång()
         {
-            Tahög.Clear();
-            Kasthög.Clear();
-            Färghögar.Clear();
-            Spelhögar.Clear();
-            Tahög.Add(new Spelkort("nocard") { Högtyp = Högtyp.Tahög }); // Lägg till en tom kort i Tahög
-            Kasthög.Add(new Spelkort("nocard") { Högtyp = Högtyp.Kasthög }); // Lägg till en tom kort i Kasthög
-            Färghögar.Add(new ObservableCollection<Spelkort>() { new Spelkort("hjarter") { Högtyp = Högtyp.Färghög, KortVärde = 0 } }); // Lägg till tomma färghögar
-            Färghögar.Add(new ObservableCollection<Spelkort>() { new Spelkort("spader") { Högtyp = Högtyp.Färghög, KortVärde = 0 } });
-            Färghögar.Add(new ObservableCollection<Spelkort>() { new Spelkort("ruter") { Högtyp = Högtyp.Färghög, KortVärde = 0 } });
-            Färghögar.Add(new ObservableCollection<Spelkort>() { new Spelkort("klover") { Högtyp = Högtyp.Färghög, KortVärde = 0 } });
             Spelplan = new ObservableCollection<Spelkort>()
             {
                 new Spelkort("nocard") { Högtyp = Högtyp.Tahög}, // Lägg till en tom kort i spelplanen
                 new Spelkort("nocard") { Högtyp = Högtyp.Kasthög },
-                new Spelkort("nocard") { Högtyp = Högtyp.Hjärterhög, KortVärde = 0 }, // Lägg till tomma färghögar i spelplanen
-                new Spelkort("nocard") { Högtyp = Högtyp.Spaderhög, KortVärde = 0 },
-                new Spelkort("nocard") { Högtyp = Högtyp.Ruterhög, KortVärde = 0 },
-                new Spelkort("nocard") { Högtyp = Högtyp.Klöverhög, KortVärde = 0 }
+                new Spelkort("hjarter") { Högtyp = Högtyp.Hjärterhög, KortVärde = 0 }, // Lägg till tomma färghögar i spelplanen
+                new Spelkort("spader") { Högtyp = Högtyp.Spaderhög, KortVärde = 0 },
+                new Spelkort("ruter") { Högtyp = Högtyp.Ruterhög, KortVärde = 0 },
+                new Spelkort("klover") { Högtyp = Högtyp.Klöverhög, KortVärde = 0 }
 
                };
-            Spelhögstyper = new ObservableCollection<string> { "Tahög", "Kasthög", "", "Hjärterhög", "Spaderhög", "Ruterhög", "Klöverhög",
-             "Spelhög1", "Spelhög2", "Spelhög3", "Spelhög4", "Spelhög5", "Spelhög6", "Spelhög7" };
+            
             var Kortlek = HanteraKortlek.BlandaKortlek();
 
             for (int i = 1; i < 8; i++)
             {
-                //Spelhögar.Add(new ObservableCollection<Spelkort>());
                 for (int j = 0; j < i; j++)
                 {
                     if (Kortlek.Count > 0)
@@ -186,7 +113,6 @@ namespace Harpan
                         var kort = Kortlek[0];
                         kort.Högtyp = (Högtyp)Enum.Parse(typeof(Högtyp), "Spelhög" + i); // Sätt Högtyp för varje rad i spelplanen
                         Spelplan.Add(kort);
-                        //Spelhögar[i].Add(kort);
                         if (j == i-1) kort.ÄrVisad = true; // Sätt ÄrVisad för det sista kortet i raden
                         Kortlek.RemoveAt(0);
                     }
@@ -198,8 +124,7 @@ namespace Harpan
                 item.Högtyp = Högtyp.Tahög;
                 Spelplan.Add(item); // Lägg till de återstående korten i Spelplan
             }
-            Kortlek.ForEach(kort => Tahög.Add(kort)); // Lägg till de återstående korten i TaHög
-
+            ForceraUIUppdatering = !ForceraUIUppdatering; // Tvinga UI-uppdatering
         }
 
 
@@ -209,19 +134,9 @@ namespace Harpan
 
         private void RensaBorders(Spelkort kort)
         {
-            foreach (var list in Spelhögar)
+            foreach (var item in Spelplan)
             {
-                foreach (var item in list)
-                {
-                    item.Visaram = false;
-                }
-            }
-            foreach (var list in Färghögar)
-            {
-                foreach (var item in list)
-                {
-                    item.Visaram = false;
-                }
+                item.Visaram = false;   
             }
             if (KlickatKort != null) KlickatKort.Visaram = false; // Rensa ram för det klickade kortet
             if (KlickatKort == kort) KlickatKort = null; // Nollställ KlickatKort om det är samma som det klickade kortet
@@ -253,7 +168,7 @@ namespace Harpan
                 else
                 {
                     
-                    var hög = Spelhögar.FirstOrDefault(h => h.Contains(kort));
+                    var hög = Spelplan.Where(x => x.Högtyp == kort.Högtyp && x.ÄrKort).ToList();
                     var index = hög?.IndexOf(kort) ?? -1;
                     if (index == hög.Count-1) 
                     {
@@ -280,77 +195,81 @@ namespace Harpan
             }
         }
 
-        private bool FlyttaKort(Spelkort? kort)
+        private bool FlyttaKort(Spelkort? kort) //Fixa flytta till färghög
         {
             bool resultat = false;
-            if (kort.Högtyp == Högtyp.Färghög)
+            var klickadtyp = KlickatKort.Högtyp;
+            if (ÄrFärghög(kort))
             {
-                if (KlickatKort.Högtyp == Högtyp.Spelhög && Spelhögar.FirstOrDefault(x => x.Contains(KlickatKort)).IndexOf(KlickatKort) < Spelhögar.FirstOrDefault(x => x.Contains(KlickatKort)).Count - 1) return false;
-                var färghögar = Färghögar.FirstOrDefault(x => x.Contains(kort));
-                if (färghögar.Last().KortVärde == 0 && KlickatKort.KortVärde == 1) 
+                if (ÄrSpelhög(KlickatKort) && Spelplan.Where(x => x.Högtyp == KlickatKort.Högtyp && x.ÄrKort).ToList().IndexOf(KlickatKort) < Spelplan.Where(x => x.Högtyp == KlickatKort.Högtyp && x.ÄrKort).ToList().Count - 1) return false;
+                var färghög = Spelplan.Where(x => x.Högtyp == kort.Högtyp).ToList();
+                if (färghög.Last().KortVärde == 0 && KlickatKort.KortVärde == 1) 
                 { 
-                    TaBortKlickatkort(); // Ta bort kortet från den tidigare högen
-                    färghögar.Add(KlickatKort);
                     KlickatKort.Högtyp = kort.Högtyp;
+                    Spelplan.Remove(KlickatKort); // Ta bort KlickatKort från den tidigare högen
+                    Spelplan.Add(KlickatKort); // Lägg till KlickatKort i spelhögen
                     resultat = true; // Flyttning lyckades
+                    VisaNästaKort(klickadtyp); // Visa nästa kort i den tidigare högen, om det är en spelhög
                     ForceraUIUppdatering = !ForceraUIUppdatering; // Tvinga UI-uppdatering
                 }
-                else if (färghögar.Last().KortVärde + 1 == KlickatKort.KortVärde && färghögar.Last().ÄrRöd == KlickatKort.ÄrRöd)
+                else if (färghög.Last().KortVärde + 1 == KlickatKort.KortVärde && färghög.Last().ÄrRöd == KlickatKort.ÄrRöd)
                 {
-                    TaBortKlickatkort(); // Ta bort kortet från den tidigare högen
-                    färghögar.Add(KlickatKort); // Lägg till kortet i färghögen
                     KlickatKort.Högtyp = kort.Högtyp;
+                    Spelplan.Remove(KlickatKort); // Ta bort KlickatKort från den tidigare högen
+                    Spelplan.Add(KlickatKort); // Lägg till KlickatKort i spelhögen
                     resultat = true; // Flyttning lyckades
+                    VisaNästaKort(klickadtyp); // Visa nästa kort i den tidigare högen, om det är en spelhög
                     ForceraUIUppdatering = !ForceraUIUppdatering; // Tvinga UI-uppdatering
                 }
             }
-            if (kort.Högtyp == Högtyp.Spelhög)
+            if (ÄrSpelhög(kort))
             {
-                var spelhög = Spelhögar.FirstOrDefault(x => x.Contains(kort));
-
+                var spelhög = Spelplan.Where(x => x.Högtyp == kort.Högtyp && x.ÄrKort).ToList();
+                var klickadhög = Spelplan.Where(x => x.Högtyp == KlickatKort.Högtyp && x.ÄrKort).ToList();
                 if (KlickatKort.Högtyp == Högtyp.Färghög || KlickatKort.Högtyp == Högtyp.Kasthög)
                 {
-                    var sistakort = spelhög.LastOrDefault();
+                    //var sistakort = spelhög.LastOrDefault(x => x.Högtyp == kort.Högtyp && x.ÄrKort);
                     if ((KlickatKort.ÄrRöd != sistakort.ÄrRöd && KlickatKort.KortVärde +1 == sistakort.KortVärde)
                         || (spelhög.LastOrDefault() != null && !spelhög.LastOrDefault().ÄrKort && KlickatKort != null && KlickatKort.KortVärde == 13))
-                    {
-                        TaBortKlickatkort(); // Ta bort kortet från den tidigare högen
-                        if (!kort.ÄrKort) spelhög.Remove(kort);
-                        spelhög.Add(KlickatKort); // Lägg till kortet i spelhögen
+                    {                      
+                        if (!kort.ÄrKort) Spelplan.Remove(kort);
                         KlickatKort.Högtyp = kort.Högtyp;
+                        Spelplan.Remove(KlickatKort); // Ta bort KlickatKort från den tidigare högen
+                        Spelplan.Add(KlickatKort); // Lägg till KlickatKort i spelhögen
+                        VisaNästaKort(klickadtyp); // Visa nästa kort i den tidigare högen, om det är en spelhög
                         resultat = true; // Flyttning lyckades
                         ForceraUIUppdatering = !ForceraUIUppdatering; // Tvinga UI-uppdatering
                     }
                 }
-                else if (KlickatKort != null)
+                else if (KlickatKort != null && kort != null && spelhög.LastOrDefault() == kort)
                 {
-                    var klickatHög = Spelhögar.FirstOrDefault(x => x.Contains(KlickatKort));
-                    var sistakort = klickatHög != null ? klickatHög.LastOrDefault() : null;
+                    var sistakort = klickadhög.LastOrDefault();
                     if ((sistakort != null && KlickatKort.KortVärde == kort.KortVärde - 1 && KlickatKort.ÄrRöd != kort.ÄrRöd)
-                        || (spelhög.LastOrDefault() != null && !spelhög.LastOrDefault().ÄrKort && KlickatKort != null && KlickatKort.KortVärde == 13))
+                        || (sistakort != null && !sistakort.ÄrKort && KlickatKort != null && KlickatKort.KortVärde == 13))
                     {
                         if (KlickatKort == sistakort)
                         {
-                            TaBortKlickatkort(); // Ta bort kortet från den tidigare högen
-                            klickatHög.LastOrDefault().ÄrVisad = klickatHög.LastOrDefault().ÄrKort ? true : false; // Sätt ÄrVisad för det sista kortet i den tidigare högen
-                            if (!kort.ÄrKort) spelhög.Remove(kort);
-                            spelhög.Add(KlickatKort); // Lägg till kortet i spelhögen
+                            //Spelplan.LastOrDefault(x => x.Högtyp == KlickatKort.Högtyp).ÄrVisad = Spelplan.LastOrDefault(x => x.Högtyp == KlickatKort.Högtyp).ÄrKort ? true : false; // Sätt ÄrVisad för det sista kortet i den tidigare högen
+                            if (!kort.ÄrKort) Spelplan.Remove(kort);
                             KlickatKort.Högtyp = kort.Högtyp;
+                            Spelplan.Remove(KlickatKort); // Ta bort KlickatKort från den tidigare högen
+                            Spelplan.Add(KlickatKort); // Lägg till KlickatKort i spelhögen
+                            VisaNästaKort(klickadtyp); // Visa nästa kort i den tidigare högen, om det är en spelhög
                             resultat = true; // Flyttning lyckades
                             ForceraUIUppdatering = !ForceraUIUppdatering; // Tvinga UI-uppdatering
                         }
                         else
                         { 
-                            var index = klickatHög.IndexOf(KlickatKort);
-                            var sekvens = klickatHög.Skip(index).ToList();
-                            if (!kort.ÄrKort) spelhög.Remove(kort);
+                            var index = klickadhög.IndexOf(KlickatKort);
+                            var sekvens = klickadhög.Skip(index).ToList();
+                            if (!kort.ÄrKort) Spelplan.Remove(kort);
                             sekvens.ForEach(k =>
                             {
-                                klickatHög.Remove(k); // Ta bort korten i sekvensen från den tidigare högen
-                                spelhög.Add(k); // Lägg till korten i spelhögen
+                                k.Högtyp = kort.Högtyp;
+                                Spelplan.Remove(k); // Ta bort korten i sekvensen från den tidigare högen
+                                Spelplan.Add(k); // Lägg till korten i spelhögen
                             });
-                            klickatHög.LastOrDefault().ÄrVisad = klickatHög.LastOrDefault().ÄrKort ? true : false; // Sätt ÄrVisad för det sista kortet i den tidigare högen
-                            KlickatKort.Högtyp = kort.Högtyp;
+                            VisaNästaKort(klickadtyp); // Visa nästa kort i den tidigare högen, om det är en spelhög
                             resultat = true;
                             ForceraUIUppdatering = !ForceraUIUppdatering; // Tvinga UI-uppdatering
                         }
@@ -367,38 +286,50 @@ namespace Harpan
                     InitieraOmgång(); // Starta om spelet
                 }
             }
+            RensaBorders(kort);
             return resultat; // Om kortet inte är i Kasthög eller Färghög, returnera false
         }
 
-        private void TaBortKlickatkort()
+        private void VisaNästaKort(Högtyp typ)
         {
-            if (Kasthög.Contains(KlickatKort))
+            var hög = Spelplan.Where(x => x.Högtyp == typ && x.ÄrKort).ToList();
+            if (hög.Count > 0) hög.LastOrDefault().ÄrVisad = true; // Sätt ÄrVisad för det sista kortet i den valda högen
+            else
             {
-                Kasthög.Remove(KlickatKort); // Ta bort kortet från Kasthög
-            }
-            else if (Färghögar.FirstOrDefault(x => x.Contains(KlickatKort)) is ObservableCollection<Spelkort> färghög)
-            {
-               färghög.Remove(KlickatKort); // Ta bort kortet från färghögen
-
-            }
-            else if (Spelhögar.FirstOrDefault(x => x.Contains(KlickatKort)) is ObservableCollection<Spelkort> spelhög)
-            {
-                spelhög.Remove(KlickatKort);
-                if (spelhög.Count == 0) spelhög.Add(new Spelkort("nocard") { Högtyp = Högtyp.Spelhög }); // Lägg till en tom kort i spelhögen om den är tom
-                else spelhög.Last().ÄrVisad = true; // Sätt ÄrVisad för det sista kortet i spelhögen1
+                var kort = new Spelkort("nocard") { Högtyp = typ};
+                Spelplan.Add(kort);
             }
         }
 
+        private bool ÄrFärghög(Spelkort kort)
+        {
+            return kort.Högtyp == Högtyp.Hjärterhög ||
+                   kort.Högtyp == Högtyp.Spaderhög ||
+                   kort.Högtyp == Högtyp.Ruterhög ||
+                   kort.Högtyp == Högtyp.Klöverhög;
+        }
+
+        private bool ÄrSpelhög(Spelkort kort)
+        {
+            return kort.Högtyp == Högtyp.Spelhög1 ||
+                   kort.Högtyp == Högtyp.Spelhög2 ||
+                   kort.Högtyp == Högtyp.Spelhög3 ||
+                   kort.Högtyp == Högtyp.Spelhög4 ||
+                   kort.Högtyp == Högtyp.Spelhög5 ||
+                   kort.Högtyp == Högtyp.Spelhög6 ||
+                   kort.Högtyp == Högtyp.Spelhög7;
+        }
 
 
         private bool KollaVinst()
         {
-            return Färghögar.Any(x => x.Count > 2);
+            return Spelplan.Where(x => x.Högtyp == Högtyp.Hjärterhög && x.ÄrKort).Count() > 2 || Spelplan.Where(x => x.Högtyp == Högtyp.Spaderhög && x.ÄrKort).Count() > 2
+                || Spelplan.Where(x => x.Högtyp == Högtyp.Ruterhög && x.ÄrKort).Count() > 2 || Spelplan.Where(x => x.Högtyp == Högtyp.Klöverhög && x.ÄrKort).Count() > 2;
         }
 
         private void TaNyttKort(Spelkort kort) //Fixa att den flytta nocard till först
         {
-            if (Spelplan.Where(x => x.Högtyp == Högtyp.Tahög).Count() > 1)
+            if (Spelplan.Where(x => x.Högtyp == Högtyp.Tahög && x.ÄrKort).Count() > 0)
             {
                 kort.Högtyp = Högtyp.Kasthög; // Sätt Högtyp till Kasthög
                 kort.ÄrVisad = true;
@@ -408,7 +339,7 @@ namespace Harpan
             }
             else
             {
-                var templista = Spelplan.Where(x => x.Högtyp == Högtyp.Kasthög).ToList();
+                var templista = Spelplan.Where(x => x.Högtyp == Högtyp.Kasthög && x.ÄrKort).ToList();
                 while (templista.Count > 0)
                 {
                     var kastkort = templista.LastOrDefault(x => x.Högtyp == Högtyp.Kasthög);
@@ -426,33 +357,6 @@ namespace Harpan
             }
             ForceraUIUppdatering = !ForceraUIUppdatering; // Tvinga UI-uppdatering
 
-        }
-
-        private void TaKort_Click(object sender, RoutedEventArgs e)
-        {
-            if (Tahög.Count > 1)
-            {
-                var kort = Tahög.Last();
-                kort.Högtyp = Högtyp.Kasthög; // Sätt Högtyp till Kasthög
-                Tahög.Remove(kort);
-                Kasthög.Add(kort);
-                kort.ÄrVisad = true;
-                RensaBorders(kort); // Rensa tidigare valda borders
-            }
-            else
-            {
-                for (int i = 1; i < Kasthög.Count; i++)
-                {
-                    var kort = Kasthög[i];
-                    kort.Högtyp = Högtyp.Tahög; // Sätt Högtyp till Tahög
-                    Tahög.Add(kort);
-                    kort.ÄrVisad = false;
-                }
-                for (int i = Kasthög.Count - 1; i > 0; i--)
-                {
-                    Kasthög.RemoveAt(i);
-                }
-            }
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -480,52 +384,6 @@ namespace Harpan
         }
 
     }
-
-    public class SpelPlanBaksidaConverter : IMultiValueConverter
-    {
-        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (values == null || values.Length < 2)
-            {
-                return null; // Or a default fallback image
-            }
-            
-            var kort = values[0] as Spelkort;
-            if (kort == null) return "pack://application:,,,/Spelkort/baksida.png"; // Default baksida om inget kort är satt
-            var spelhögar = values[1] as ObservableCollection<ObservableCollection<Spelkort>>;
-            var hög = spelhögar?.FirstOrDefault(h => h.Contains(kort));
-            if (hög == null) return "pack://application:,,,/Spelkort/baksida.png"; // Default baksida om ingen hög hittas
-            string imagePath = kort.ÄrVisad || !kort.ÄrKort ? kort.ImageGenväg : $"pack://application:,,,/Spelkort/baksida.png";
-
-            if (string.IsNullOrEmpty(imagePath))
-            {
-                return null;
-            }
-
-            try
-            {
-                BitmapImage image = new BitmapImage();
-                image.BeginInit();
-                image.UriSource = new Uri(imagePath, UriKind.Absolute);
-                image.EndInit();
-
-                // Return the fully formed BitmapImage object, not the string.
-                return image;
-            }
-            catch (Exception)
-            {
-                // If the URI is bad or the image doesn't exist, return null 
-                // or a default "image not found" image.
-                return null;
-            }
-        }
-
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
 
     public class BaksidaConverter : IMultiValueConverter
     {
@@ -573,15 +431,6 @@ namespace Harpan
 
     public class FiltreraSpelhögarConverter : IMultiValueConverter
     {
-        //public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        //{
-        //    var lista = value as ObservableCollection<Spelkort>;
-        //    var typ = parameter as string;
-        //    Högtyp högtyp = (Högtyp)Enum.Parse(typeof(Högtyp), typ);
-        //    if (lista == null) return null;
-
-        //    return lista.Where(x => x.Högtyp == högtyp);
-        //}
 
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
@@ -593,7 +442,6 @@ namespace Harpan
             Högtyp högtyp;
             Enum.TryParse(filter, out högtyp);
             var lista = values[1] as ObservableCollection<Spelkort>;
-            var testlista = lista.Where(x => x.Högtyp == högtyp).ToList(); 
             return lista.Where(x => x.Högtyp == högtyp).ToList();
         }
 
@@ -616,6 +464,48 @@ namespace Harpan
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class IndexToOffsetYConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            // We expect two values: the current card and the list it belongs to.
+            if (values.Length < 2 || !(values[0] is Spelkort currentCard) || !(values[1] is ObservableCollection<Spelkort> cardList))
+            {
+                return 0.0;
+            }
+
+            // --- THIS IS THE NEW CONDITIONAL LOGIC ---
+            // First, check the Högtyp to see if this pile should be a perfect stack.
+            if (currentCard.Högtyp == Högtyp.Tahög || currentCard.Högtyp == Högtyp.Kasthög ||
+                currentCard.Högtyp == Högtyp.Hjärterhög || currentCard.Högtyp == Högtyp.Spaderhög ||
+                currentCard.Högtyp == Högtyp.Ruterhög || currentCard.Högtyp == Högtyp.Klöverhög)
+            {
+                // For these pile types, return an offset of 0 for every card.
+                // This creates a perfect, non-staggered stack.
+                return 0.0;
+            }
+            else
+            {
+                // For all other pile types (e.g., Spelhög1-7), apply the stagger logic.
+                var kort = values[0] as Spelkort;
+                if (kort == null) return 0.0;
+                var list = cardList.Where(x => x.Högtyp == kort.Högtyp).ToList();
+                int index = list.IndexOf(currentCard);
+
+                if (index < 0) return 0.0;
+
+                // Each card is shifted down by 30 pixels more than the one above it.
+                double offsetY = index * 30.0;
+                return offsetY;
+            }
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }

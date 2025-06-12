@@ -8,26 +8,22 @@
         Title="MainWindow" Height="900" Width="1050" KeyDown="Window_KeyDown" >
     <Window.Resources>
         <local:VisaRamConverter x:Key="VisaRamConverter"/>
-        <local:SpelPlanBaksidaConverter x:Key="SpelPlanBaksidaConverter"></local:SpelPlanBaksidaConverter>
         <local:BaksidaConverter x:Key="BaksidaConverter"></local:BaksidaConverter>
         <local:FiltreraSpelhögarConverter x:Key="FiltreraSpelhögarConverter"></local:FiltreraSpelhögarConverter>
+        <local:IndexToOffsetYConverter x:Key="IndexToOffsetYConverter"></local:IndexToOffsetYConverter>
         <local:MarginConverter x:Key="MarginConverter"></local:MarginConverter>
-        <local:BindingProxy x:Key="Spelhögar" Data="{Binding Spelhögar}"/>
         <local:BindingProxy x:Key="ForceraUIUppdatering" Data="{Binding ForceraUIUppdatering}"/>
-        <local:BindingProxy x:Key="Tahög" Data="{Binding Tahög}"/>
-        <local:BindingProxy x:Key="Kasthög" Data="{Binding Kasthög}"/>
-        <local:BindingProxy x:Key="Färghögar" Data="{Binding Färghögar}"/>
     </Window.Resources>
     <Grid Background="#407740">
         <ItemsControl ItemsSource="{Binding Spelhögstyper}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <UniformGrid Columns="7" Margin="0 150 0 0"></UniformGrid>
+                    <WrapPanel MaxWidth="900"></WrapPanel>
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <ItemsControl>
+                    <ItemsControl Width="106" Margin="0 150 20 0">
                         <ItemsControl.ItemsSource>
                             <MultiBinding Converter="{StaticResource FiltreraSpelhögarConverter}">
                                 <Binding Path="." />
@@ -35,10 +31,11 @@
                                 <Binding Path="Data" Source="{StaticResource ForceraUIUppdatering}"/>
                             </MultiBinding>
                         </ItemsControl.ItemsSource>
+
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
-                                    <Border Width="106" Height="150"  BorderThickness="3" BorderBrush="{Binding Visaram, Converter={StaticResource VisaRamConverter}}" MouseDown="Border_MouseDown" Margin="{Binding Converter={StaticResource MarginConverter}}">
+                                    <Border Width="106" Height="150"  BorderThickness="3" BorderBrush="{Binding Visaram, Converter={StaticResource VisaRamConverter}}" MouseDown="Border_MouseDown" Margin="{Binding Converter={StaticResource MarginConverter}}" >
                                         <Image  Width="100" Height="144">
                                             <Image.Source>
                                                 <MultiBinding Converter="{StaticResource BaksidaConverter}">
