@@ -10,12 +10,11 @@
         <local:VisaRamConverter x:Key="VisaRamConverter"/>
         <local:BaksidaConverter x:Key="BaksidaConverter"></local:BaksidaConverter>
         <local:FiltreraSpelhögarConverter x:Key="FiltreraSpelhögarConverter"></local:FiltreraSpelhögarConverter>
-        <local:IndexToOffsetYConverter x:Key="IndexToOffsetYConverter"></local:IndexToOffsetYConverter>
         <local:MarginConverter x:Key="MarginConverter"></local:MarginConverter>
         <local:BindingProxy x:Key="ForceraUIUppdatering" Data="{Binding ForceraUIUppdatering}"/>
     </Window.Resources>
     <Grid Background="#407740">
-        <ItemsControl ItemsSource="{Binding Spelhögstyper}">
+        <ItemsControl ItemsSource="{Binding Spelhögstyper}" Margin="50">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel MaxWidth="900"></WrapPanel>
@@ -36,7 +35,7 @@
                             <DataTemplate>
                                 <Grid>
                                     <Border Width="106" Height="150"  BorderThickness="3" BorderBrush="{Binding Visaram, Converter={StaticResource VisaRamConverter}}" MouseDown="Border_MouseDown" Margin="{Binding Converter={StaticResource MarginConverter}}" >
-                                        <Image  Width="100" Height="144">
+                                        <Image  Width="100" Height="144" RenderOptions.BitmapScalingMode="HighQuality">
                                             <Image.Source>
                                                 <MultiBinding Converter="{StaticResource BaksidaConverter}">
                                                     <Binding Path="." />

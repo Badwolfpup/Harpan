@@ -9,10 +9,7 @@ namespace Harpan
 {
     public enum Högtyp
     {
-        //Tahög,
-        //Kasthög,
-        Färghög,
-        Spelhög,
+        Tomhög,
         Tahög,
         Kasthög,
         Hjärterhög,
@@ -30,11 +27,16 @@ namespace Harpan
     }
     public class Spelkort: INotifyPropertyChanged
     {
+        #region INotifyPropertyChanged Implementation
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+        #endregion
+
+        #region Constructors
+
         public Spelkort() { }
     
         public Spelkort(string färg, int kortvärde)
@@ -51,8 +53,15 @@ namespace Harpan
         {
             ImageGenväg = Genväg(genväg);
         }
+        #endregion
 
-        private bool _visaram;
+        #region Private Fields
+            private bool _visaram;
+            private Högtyp _högtyp;
+            private string _imagegenväg;
+        #endregion
+
+        #region Public Properties
         public bool Visaram
         {
             get { return _visaram; }
@@ -66,7 +75,6 @@ namespace Harpan
             }
         }
 
-        private Högtyp _högtyp;
         public Högtyp Högtyp
         {
             get { return _högtyp; }
@@ -80,15 +88,14 @@ namespace Harpan
             }
         }
 
-        public bool ÄrVisad { get; set; }
-        public string Valör { get; set; }
         public int KortVärde { get; set; }
-        public string Färg { get; set; }
 
         public bool ÄrRöd { get; set; }
-
+        public bool ÄrVisad { get; set; }
         public bool ÄrKort { get; set; }
-        private string _imagegenväg;
+
+        public string Färg { get; set; }
+        public string Valör { get; set; }
         public string ImageGenväg
         {
             get { return _imagegenväg; }
@@ -101,11 +108,10 @@ namespace Harpan
                 }
             }
         }
+        #endregion
 
-        private string Genväg(string genvag)
-        {
-            return ÄrKort ? $"pack://application:,,,/Spelkort/{Färg}{Valör}.png" : $"pack://application:,,,/Spelkort/{genvag}.png";
-        }
+
+        private string Genväg(string genvag) => ÄrKort ? $"pack://application:,,,/Spelkort/{Färg}{Valör}.png" : $"pack://application:,,,/Spelkort/{genvag}.png";
 
         private string BeräknaValör(int kort)
         {
