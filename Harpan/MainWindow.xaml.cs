@@ -159,9 +159,6 @@ namespace Harpan
 
             if (sender is Border b && b.DataContext is Spelkort kort)
             {
-
-
-
                 // Om kortet är i Tahög, ta ett nytt kort
                 if (kort.Högtyp == Högtyp.Tahög)
                 {
@@ -170,128 +167,145 @@ namespace Harpan
                 }
 
                 //Om kortet kan flyttas till en annan hög, returnera
-                if (!_manuellförflyttning && _automatiskförflyttning && !ÄrFärghög(kort) && HittaKortAttFlyttaTill(kort)) return;
+                //if (!_manuellförflyttning && _automatiskförflyttning && !ÄrFärghög(kort) && HittaKortAttFlyttaTill(kort)) return;
 
+                if (_automatiskförflyttning)
+                {
+                    KlickatKort = kort; // Sätt KlickatKort till det klickade kortet
+                    foreach (var item in Spelhögstyper)
+                    {
+                        if (item == "") continue; // Hoppa över tomma högar
+                        var högtyp = (Högtyp)Enum.Parse(typeof(Högtyp), item);
+                        if (högtyp == Högtyp.Tahög || högtyp == Högtyp.Kasthög || högtyp == Högtyp.Tomhög || högtyp == KlickatKort.Högtyp) continue; // Hoppa över Tahög och Kasthög
+                        if (FlyttaKort(Spelplan.Where(x => x.Högtyp == högtyp).LastOrDefault())) return; // Försök flytta kortet till den aktuella högen
+                    }
+                }
+                else if (_manuellförflyttning)
+                {
                 // Om KlickatKort är satt och flyttning lyckas, returnera
-                if (KlickatKort != null && FlyttaKort(kort))
-                {
-                    RensaBorders(kort); // Rensa tidigare valda borders
-                    return;
-                }
-
-                if (kort != null && !kort.ÄrKort) return; // Om kortet inte är ett giltigt kort, returnera
-
-                // Om kortet är i Kasthög eller Färghög, sätt ram och KlickatKort
-                if (kort.Högtyp == Högtyp.Kasthög || ÄrFärghög(kort))
-                {
-                    RensaBorders(kort); // Rensa tidigare valda borders
-                    kort.Visaram = true; // Sätt ram för det klickade kortet
-                    KlickatKort = kort; // Sätt det klickade kortet som KlickatKort
-                }
-
-                else
-                {
-
-                    var hög = Spelplan.Where(x => x.Högtyp == kort.Högtyp && x.ÄrKort).ToList();
-                    var index = hög?.IndexOf(kort) ?? -1;
-                    // Om kortet är det sista i raden, sätt ram och KlickatKort
-                    if (index == hög.Count - 1)
+                    if (KlickatKort != null && FlyttaKort(kort))
                     {
-                        RensaBorders(kort);
-                        KlickatKort = kort;
-                        kort.Visaram = true;
+                        RensaBorders(kort); // Rensa tidigare valda borders
                     }
-                    // Om kortet är i en spelhög och alla korten i raden följer reglerna, sätt ram för alla kort i raden och KlickatKort
-                    else if (hög.Skip(index).Zip(hög.Skip(index + 1), (prev, current) => prev.ÄrRöd != current.ÄrRöd && prev.KortVärde - 1 == current.KortVärde).ToList().All(x => x))
+                    else
                     {
-                        RensaBorders(kort);
-                        for (int i = index; i < hög.Count; i++)
+
+                        if (kort != null && !kort.ÄrKort) return; // Om kortet inte är ett giltigt kort, returnera
+
+                        // Om kortet är i Kasthög eller Färghög, sätt ram och KlickatKort
+                        if (kort.Högtyp == Högtyp.Kasthög || ÄrFärghög(kort))
                         {
-                            var spelkort = hög[i];
-                            spelkort.Visaram = true; // Sätt ram för alla kort i den valda raden
+                            RensaBorders(kort); // Rensa tidigare valda borders
+                            kort.Visaram = true; // Sätt ram för det klickade kortet
+                            KlickatKort = kort; // Sätt det klickade kortet som KlickatKort
                         }
-                        KlickatKort = kort; // Sätt det klickade kortet som KlickatKort
-                    }
 
-                    //Om spelet är vunnet, visa meddelande och starta om spelet
-                    if (KollaVinst())
-                    {
-                        MessageBox.Show("Grattis! Du har vunnit spelet!", "Vinst", MessageBoxButton.OK, MessageBoxImage.Information);
-                        InitieraOmgång(); // Starta om spelet
-                    }
-                }
-            }
-        }
-
-        private bool HittaKortAttFlyttaTill(Spelkort kort)
-        {
-            bool resultat = false;
-            RensaBorders(kort); // Rensa tidigare valda borders
-            if (Spelplan.Where(x => x.Högtyp == HittaFärg(kort)).LastOrDefault().KortVärde == kort.KortVärde - 1)
-            {
-                var gammaltyp = kort.Högtyp; // Spara den gamla högtypen för kortet
-                kort.Högtyp = HittaFärg(kort); // Sätt Högtyp till den färghög som kortet tillhör
-                Spelplan.Remove(kort); // Ta bort kortet från den tidigare högen
-                Spelplan.Add(kort); // Lägg till kortet i spelhögen
-                resultat = true; // Flyttning lyckades
-                KlickatKort = null; // Nollställ KlickatKort efter flyttning
-                VisaNästaKort(gammaltyp); // Visa nästa kort i den tidigare högen, om det är en spelhög
-                ForceraUIUppdatering = !ForceraUIUppdatering; // Tvinga UI-uppdatering
-                return true;
-            }
-            else
-            {
-                for (int i = 1; i < 8; i++)
-                {
-                    var högtyp = (Högtyp)Enum.Parse(typeof(Högtyp), "Spelhög" + i);
-                    if (kort.Högtyp == högtyp) continue; // Hoppa över den spelhögen som kortet redan är i
-                    var spelhög = Spelplan.Where(x => x.Högtyp == högtyp).ToList();
-
-                    if (spelhög.Count > 0)
-                    {
-                        var gammaltyp = kort.Högtyp; // Spara den gamla högtypen för kortet
-                        var sistakort = spelhög.LastOrDefault();
-                        // Kolla om det klickade kortet kan flyttas till den aktuella spelhögen
-                        if ((kort.KortVärde == sistakort.KortVärde - 1 && kort.ÄrRöd != sistakort.ÄrRöd) || (!sistakort.ÄrKort && kort.KortVärde == 13))
+                        else
                         {
-                            if (Spelplan.Where(x => x.Högtyp == kort.Högtyp).LastOrDefault() == kort)
+
+                            var hög = Spelplan.Where(x => x.Högtyp == kort.Högtyp && x.ÄrKort).ToList();
+                            var index = hög?.IndexOf(kort) ?? -1;
+                            // Om kortet är det sista i raden, sätt ram och KlickatKort
+                            if (index == hög.Count - 1)
                             {
-                                if (!sistakort.ÄrKort) Spelplan.Remove(sistakort);
-                                kort.Högtyp = (Högtyp)Enum.Parse(typeof(Högtyp), "Spelhög" + i); // Sätt Högtyp för kortet till den aktuella spelhögen
-                                Spelplan.Remove(kort); // Ta bort kortet från den tidigare högen
-                                Spelplan.Add(kort); // Lägg till kortet i spelhögen
-                                resultat = true; // Flyttning lyckades
-                                KlickatKort = null; // Nollställ KlickatKort efter flyttning
-                                VisaNästaKort(gammaltyp); // Visa nästa kort i den tidigare högen, om det är en spelhög
-                                ForceraUIUppdatering = !ForceraUIUppdatering; // Tvinga UI-uppdatering
-                                break;
-                            } 
-                            else
+                                RensaBorders(kort);
+                                KlickatKort = kort;
+                                kort.Visaram = true;
+                            }
+                            // Om kortet är i en spelhög och alla korten i raden följer reglerna, sätt ram för alla kort i raden och KlickatKort
+                            else if (hög.Skip(index).Zip(hög.Skip(index + 1), (prev, current) => prev.ÄrRöd != current.ÄrRöd && prev.KortVärde - 1 == current.KortVärde).ToList().All(x => x))
                             {
-                                if (!sistakort.ÄrKort) Spelplan.Remove(sistakort);
-                                var index = Spelplan.Where(x => x.Högtyp == kort.Högtyp).ToList().IndexOf(kort);
-                                var sekvens = Spelplan.Where(x => x.Högtyp == kort.Högtyp).ToList().Skip(index).ToList();
-                                if (!kort.ÄrKort) Spelplan.Remove(kort);
-                                sekvens.ForEach(k =>
+                                RensaBorders(kort);
+                                for (int i = index; i < hög.Count; i++)
                                 {
-                                    k.Högtyp = kort.Högtyp;
-                                    Spelplan.Remove(k); // Ta bort korten i sekvensen från den tidigare högen
-                                    Spelplan.Add(k); // Lägg till korten i spelhögen
-                                });
-                                VisaNästaKort(gammaltyp); // Visa nästa kort i den tidigare högen, om det är en spelhög
-                                resultat = true;
-                                ForceraUIUppdatering = !ForceraUIUppdatering; // Tvinga UI-uppdatering
+                                    var spelkort = hög[i];
+                                    spelkort.Visaram = true; // Sätt ram för alla kort i den valda raden
+                                }
+                                KlickatKort = kort; // Sätt det klickade kortet som KlickatKort
                             }
                         }
-                    }
+                    } 
                 }
+                //Om spelet är vunnet, visa meddelande och starta om spelet
+                if (KollaVinst())
+                {
+                    MessageBox.Show("Grattis! Du har vunnit spelet!", "Vinst", MessageBoxButton.OK, MessageBoxImage.Information);
+                    InitieraOmgång(); // Starta om spelet
+                }
+                
             }
-
-
-                return resultat;
         }
 
+        //private bool HittaKortAttFlyttaTill(Spelkort kort)
+        //{
+        //    bool resultat = false;
+        //    RensaBorders(kort); // Rensa tidigare valda borders
+        //    if (Spelplan.Where(x => x.Högtyp == HittaFärg(kort)).LastOrDefault().KortVärde == kort.KortVärde - 1)
+        //    {
+        //        var gammaltyp = kort.Högtyp; // Spara den gamla högtypen för kortet
+        //        kort.Högtyp = HittaFärg(kort); // Sätt Högtyp till den färghög som kortet tillhör
+        //        Spelplan.Remove(kort); // Ta bort kortet från den tidigare högen
+        //        Spelplan.Add(kort); // Lägg till kortet i spelhögen
+        //        resultat = true; // Flyttning lyckades
+        //        KlickatKort = null; // Nollställ KlickatKort efter flyttning
+        //        VisaNästaKort(gammaltyp); // Visa nästa kort i den tidigare högen, om det är en spelhög
+        //        ForceraUIUppdatering = !ForceraUIUppdatering; // Tvinga UI-uppdatering
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        for (int i = 1; i < 8; i++)
+        //        {
+        //            var högtyp = (Högtyp)Enum.Parse(typeof(Högtyp), "Spelhög" + i);
+        //            if (kort.Högtyp == högtyp) continue; // Hoppa över den spelhögen som kortet redan är i
+        //            var spelhög = Spelplan.Where(x => x.Högtyp == högtyp).ToList();
+
+        //            if (spelhög.Count > 0)
+        //            {
+        //                var gammaltyp = kort.Högtyp; // Spara den gamla högtypen för kortet
+        //                var sistakort = spelhög.LastOrDefault();
+        //                // Kolla om det klickade kortet kan flyttas till den aktuella spelhögen
+        //                if ((kort.KortVärde == sistakort.KortVärde - 1 && kort.ÄrRöd != sistakort.ÄrRöd) || (!sistakort.ÄrKort && kort.KortVärde == 13))
+        //                {
+        //                    if (Spelplan.Where(x => x.Högtyp == kort.Högtyp).LastOrDefault() == kort)
+        //                    {
+        //                        if (!sistakort.ÄrKort) Spelplan.Remove(sistakort);
+        //                        kort.Högtyp = (Högtyp)Enum.Parse(typeof(Högtyp), "Spelhög" + i); // Sätt Högtyp för kortet till den aktuella spelhögen
+        //                        Spelplan.Remove(kort); // Ta bort kortet från den tidigare högen
+        //                        Spelplan.Add(kort); // Lägg till kortet i spelhögen
+        //                        resultat = true; // Flyttning lyckades
+        //                        KlickatKort = null; // Nollställ KlickatKort efter flyttning
+        //                        VisaNästaKort(gammaltyp); // Visa nästa kort i den tidigare högen, om det är en spelhög
+        //                        ForceraUIUppdatering = !ForceraUIUppdatering; // Tvinga UI-uppdatering
+        //                        break;
+        //                    } 
+        //                    else
+        //                    {
+        //                        if (!sistakort.ÄrKort) Spelplan.Remove(sistakort);
+        //                        var index = Spelplan.Where(x => x.Högtyp == kort.Högtyp).ToList().IndexOf(kort);
+        //                        var sekvens = Spelplan.Where(x => x.Högtyp == kort.Högtyp).ToList().Skip(index).ToList();
+        //                        if (!kort.ÄrKort) Spelplan.Remove(kort);
+        //                        sekvens.ForEach(k =>
+        //                        {
+        //                            k.Högtyp = kort.Högtyp;
+        //                            Spelplan.Remove(k); // Ta bort korten i sekvensen från den tidigare högen
+        //                            Spelplan.Add(k); // Lägg till korten i spelhögen
+        //                        });
+        //                        VisaNästaKort(gammaltyp); // Visa nästa kort i den tidigare högen, om det är en spelhög
+        //                        resultat = true;
+        //                        ForceraUIUppdatering = !ForceraUIUppdatering; // Tvinga UI-uppdatering
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+
+
+        //        return resultat;
+        //}
+
         // Flytta kortet till rätt hög baserat på reglerna
+
         private bool FlyttaKort(Spelkort? kort)
         {
             bool resultat = false; // Flagga för att indikera om flyttning lyckades
@@ -317,7 +331,7 @@ namespace Harpan
                     ForceraUIUppdatering = !ForceraUIUppdatering; // Tvinga UI-uppdatering
                 }
                 //Kollar om det klickade kortet är av samma färg och en valör högre
-                else if (färghög.Last().KortVärde + 1 == KlickatKort.KortVärde && färghög.Last().ÄrRöd == KlickatKort.ÄrRöd)
+                else if (färghög.Last().KortVärde + 1 == KlickatKort.KortVärde && färghög.Last().Färg == KlickatKort.Färg)
                 {
                     KlickatKort.Högtyp = kort.Högtyp;
                     Spelplan.Remove(KlickatKort); // Ta bort KlickatKort från den tidigare högen
