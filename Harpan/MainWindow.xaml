@@ -14,7 +14,17 @@
         <local:BindingProxy x:Key="ForceraUIUppdatering" Data="{Binding ForceraUIUppdatering}"/>
     </Window.Resources>
     <Grid Background="#407740">
-        <ItemsControl ItemsSource="{Binding Spelhögstyper}" Margin="50">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <RadioButton  GroupName="GameMode" Tag="1" FontSize="24" VerticalContentAlignment="Center" Margin="0 0 20 0" IsChecked="True" Checked="RadioButton_Checked">Spela manuellt</RadioButton>
+            <RadioButton GroupName="GameMode" Tag="2" FontSize="24" VerticalContentAlignment="Center" Margin="0 0 20 0" Checked="RadioButton_Checked">Automatisk förflyttning</RadioButton>
+            <RadioButton GroupName="GameMode" Tag="3" FontSize="24" VerticalContentAlignment="Center" Margin="0 0 20 0" Checked="RadioButton_Checked">Automatisk lösning</RadioButton>
+            <Button Content="Starta auto" FontSize="18" Click="Button_Click" Padding="10 0 10 0"></Button>
+        </StackPanel>
+        <ItemsControl ItemsSource="{Binding Spelhögstyper}" Margin="50" Grid.Row="1">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel MaxWidth="900"></WrapPanel>
