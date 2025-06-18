@@ -5,15 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Harpan"
         mc:Ignorable="d"
-        Title="MainWindow" Height="900" Width="1050" KeyDown="Window_KeyDown" >
+        Title="MainWindow" Height="900" Width="1300" KeyDown="Window_KeyDown" SizeToContent="Height" >
     <Window.Resources>
         <local:VisaRamConverter x:Key="VisaRamConverter"/>
         <local:BaksidaConverter x:Key="BaksidaConverter"></local:BaksidaConverter>
         <local:FiltreraSpelhögarConverter x:Key="FiltreraSpelhögarConverter"></local:FiltreraSpelhögarConverter>
         <local:MarginConverter x:Key="MarginConverter"></local:MarginConverter>
         <local:BindingProxy x:Key="ForceraUIUppdatering" Data="{Binding ForceraUIUppdatering}"/>
+        <local:OrientationConverter x:Key="OrientationConverter"></local:OrientationConverter>
+        <local:ItemsControlMarginConverter x:Key="ItemsControlMarginConverter"></local:ItemsControlMarginConverter>
+        <local:ItemsControlWidthConverter x:Key="ItemsControlWidthConverter"></local:ItemsControlWidthConverter>
+        <local:WrapPanelMaxWidthConverter x:Key="WrapPanelMaxWidthConverter"></local:WrapPanelMaxWidthConverter>
     </Window.Resources>
-    <Grid Background="#407740">
+    <Grid Background="#407740" ScrollViewer.VerticalScrollBarVisibility="Auto">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
@@ -21,30 +25,72 @@
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
             <RadioButton  GroupName="GameMode" Tag="1" FontSize="24" VerticalContentAlignment="Center" Margin="0 0 20 0" IsChecked="True" Checked="RadioButton_Checked">Spela manuellt</RadioButton>
             <RadioButton GroupName="GameMode" Tag="2" FontSize="24" VerticalContentAlignment="Center" Margin="0 0 20 0" Checked="RadioButton_Checked">Automatisk förflyttning</RadioButton>
-            <RadioButton GroupName="GameMode" Tag="3" FontSize="24" VerticalContentAlignment="Center" Margin="0 0 20 0" Checked="RadioButton_Checked">Automatisk lösning</RadioButton>
-            <Button Content="Starta auto" FontSize="18" Click="Button_Click" Padding="10 0 10 0"></Button>
+            <RadioButton GroupName="TaEnTre" Tag="1" FontSize="24" VerticalContentAlignment="Center" Margin="0 0 20 0" IsChecked="True" Checked="RadioButton_Checked_1" IsEnabled="{Binding GameStarted}">Ta 1</RadioButton>
+            <RadioButton GroupName="TaEnTre" Tag="3" FontSize="24" VerticalContentAlignment="Center" Margin="0 0 20 0" Checked="RadioButton_Checked_1" IsEnabled="{Binding GameStarted}">Ta 3</RadioButton>
+
         </StackPanel>
         <ItemsControl ItemsSource="{Binding Spelhögstyper}" Margin="50" Grid.Row="1">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <WrapPanel MaxWidth="900"></WrapPanel>
+                    <WrapPanel>
+                        <WrapPanel.MaxWidth>
+                            <MultiBinding Converter="{StaticResource WrapPanelMaxWidthConverter}">
+                                <Binding Path="." />
+                                <Binding Path="DataContext.Spelplan" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                <Binding Path="DataContext.TaEntre" RelativeSource="{RelativeSource AncestorType=Window}" />
+                            </MultiBinding>
+                        </WrapPanel.MaxWidth>
+                    </WrapPanel>
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <ItemsControl Width="106" Margin="0 150 20 0">
+                    <ItemsControl  Margin="0 150 20 0">
+                        <!--<ItemsControl.Margin>
+                            <Binding 
+                                Converter="{StaticResource ItemsControlMarginConverter}"
+                                Path="."></Binding>
+                        </ItemsControl.Margin>-->
                         <ItemsControl.ItemsSource>
                             <MultiBinding Converter="{StaticResource FiltreraSpelhögarConverter}">
                                 <Binding Path="." />
                                 <Binding Path="DataContext.Spelplan" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                <Binding Path="DataContext.TaEntre" RelativeSource="{RelativeSource AncestorType=Window}" />
                                 <Binding Path="Data" Source="{StaticResource ForceraUIUppdatering}"/>
                             </MultiBinding>
                         </ItemsControl.ItemsSource>
-
-                        <ItemsControl.ItemTemplate>
+                        <ItemsControl.Width>
+                            <MultiBinding Converter="{StaticResource ItemsControlWidthConverter}">
+                                <Binding Path="." />
+                                <Binding Path="DataContext.Spelplan" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                <Binding Path="DataContext.TaEntre" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                <Binding Path="Data" Source="{StaticResource ForceraUIUppdatering}"/>
+                            </MultiBinding>
+                        </ItemsControl.Width>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel>
+                                    <StackPanel.Orientation>
+                                        <MultiBinding Converter="{StaticResource OrientationConverter}">
+                                            <Binding Path="." />
+                                            <Binding Path="DataContext.TaEntre" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                            <Binding Path="Data" Source="{StaticResource ForceraUIUppdatering}"/>
+                                        </MultiBinding>
+                                    </StackPanel.Orientation>
+                                </StackPanel>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
-                                    <Border Width="106" Height="150"  BorderThickness="3" BorderBrush="{Binding Visaram, Converter={StaticResource VisaRamConverter}}" MouseDown="Border_MouseDown" Margin="{Binding Converter={StaticResource MarginConverter}}" >
+                                    <Border Width="106" Height="150"  BorderThickness="3" BorderBrush="{Binding Visaram, Converter={StaticResource VisaRamConverter}}" MouseDown="Border_MouseDown"  >
+                                        <Border.Margin>
+                                            <MultiBinding Converter="{StaticResource MarginConverter}">
+                                                <Binding Path="."/>
+                                                <Binding Path="DataContext.Spelplan" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                                <Binding Path="DataContext.TaEntre" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                                            </MultiBinding>
+                                        </Border.Margin>
                                         <Image  Width="100" Height="144" RenderOptions.BitmapScalingMode="HighQuality">
                                             <Image.Source>
                                                 <MultiBinding Converter="{StaticResource BaksidaConverter}">

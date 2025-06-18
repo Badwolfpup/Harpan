@@ -1,0 +1,16 @@
+﻿Fixa så att kasthögen bara visar 3 kort i i taget och att den inte fyller ¨på innan alla kort är spelade (kolla windowsversionen)
+	kommer underlätta margin o annat
+
+Ändra margin på itemscontrol utifrån högtyp (vänstermarginal för kasthög, uppmarginal för resten)
+MarginConverter
+
+Lägg till marginal på kort 2 o 3
+Justera yta med ta tre?
+Hantera (ignorera) klick event på kort 2 o 3
+Kolla hur windows-versionen gör 
+
+Animationer
+	Doubleanimation
+	Läs in itemscontrol när man klickar --> hitta korrekt border/itemscontrol när man konstaterat att det går att flytta
+	Skapa tempkort undre själva animationen
+	Ta bort kort och refresha innan animtionen startar

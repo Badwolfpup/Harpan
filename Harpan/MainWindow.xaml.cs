@@ -37,11 +37,14 @@ namespace Harpan
         #region Private Fields
         private Spelkort _klickatkort;
         private bool _forceraUIUppdatering;
+        private bool _taentre = true;
+        private bool _gamestarted = true;
         private ObservableCollection<Spelkort> _spelplan;
         private bool _manuellförflyttning = true;
         private bool _automatiskförflyttning = false;
         private bool _automatisklösning = false;
         private bool _aktiverad = false;
+        private Orientation _orientation;
         DispatcherTimer _timer;
         #endregion
 
@@ -76,6 +79,45 @@ namespace Harpan
             }
         }
 
+        public bool TaEntre
+        {
+            get { return _taentre; }
+            set
+            {
+                if (_taentre != value)
+                {
+                    _taentre = value;
+                    OnPropertyChanged(nameof(TaEntre));
+                }
+            }
+        }
+
+        public bool GameStarted
+        {
+            get { return _gamestarted; }
+            set
+            {
+                if (_gamestarted != value)
+                {
+                    _gamestarted = value;
+                    OnPropertyChanged(nameof(GameStarted));
+                }
+            }
+        }
+
+        public Orientation Orientation
+        {
+            get { return _orientation; }
+            set
+            {
+                if (_orientation != value)
+                {
+                    _orientation = value;
+                    OnPropertyChanged(nameof(Orientation));
+                }
+            }
+        }
+
         // Spelplan som innehåller alla kort i spelet, inklusive tomma högar
         public ObservableCollection<Spelkort> Spelplan
         {
@@ -95,6 +137,7 @@ namespace Harpan
         public MainWindow()
         {
             InitializeComponent();
+            Orientation = Orientation.Vertical; // Sätt standardorientering till vertikal
             DataContext = this;
             Spelhögstyper = new ObservableCollection<string> { "Tahög", "Kasthög", "", "Hjärterhög", "Spaderhög", "Ruterhög", "Klöverhög",
              "Spelhög1", "Spelhög2", "Spelhög3", "Spelhög4", "Spelhög5", "Spelhög6", "Spelhög7" };
@@ -138,7 +181,7 @@ namespace Harpan
                 item.Högtyp = Högtyp.Tahög;
                 Spelplan.Add(item); // Lägg till de återstående korten i Spelplan
             }
-
+            GameStarted = true;
             ForceraUIUppdatering = !ForceraUIUppdatering; // Tvinga UI-uppdatering
         }
 
@@ -159,6 +202,7 @@ namespace Harpan
 
             if (sender is Border b && b.DataContext is Spelkort kort)
             {
+                GameStarted = false;
                 // Om kortet är i Tahög, ta ett nytt kort
                 if (kort.Högtyp == Högtyp.Tahög)
                 {
@@ -487,7 +531,7 @@ namespace Harpan
 
         private bool ÄrAllaKortUppvända()
         {
-            return Spelplan.Where(x => x.Högtyp == Högtyp.Tahög && x.ÄrKort).Count() == 0 && Spelplan.Where(x => ÄrSpelhög(x) && x.ÄrKort).All(x => x.ÄrVisad);
+            return Spelplan.Where(x => ÄrSpelhög(x) && x.ÄrKort).All(x => x.ÄrVisad);
         }
 
         // Hantera klick på kort i Tahög för att ta ett nytt kort
@@ -496,12 +540,30 @@ namespace Harpan
             // Om det finns kort i Tahög, flytta det klickade kortet till Kasthög
             if (Spelplan.Where(x => x.Högtyp == Högtyp.Tahög && x.ÄrKort).Count() > 0)
             {
-                kort.Högtyp = Högtyp.Kasthög;
-                kort.ÄrVisad = true;
+                if (TaEntre)
+                {
+                    kort.Högtyp = Högtyp.Kasthög;
+                    kort.ÄrVisad = true;
 
-                //Ta bort och lägg tillbaka kortet så att det hamnar i rätt position i listan
-                Spelplan.Remove(kort);
-                Spelplan.Add(kort);
+                    //Ta bort och lägg tillbaka kortet så att det hamnar i rätt position i listan
+                    Spelplan.Remove(kort);
+                    Spelplan.Add(kort);
+                    
+                }
+                else
+                {
+                    var tahög = Spelplan.Where(x => x.Högtyp == Högtyp.Tahög).ToList();
+                    var templista = tahög.Skip(tahög.Count > 2 ? tahög.Count - 3 : 0).ToList();
+                    foreach (var item in templista)
+                    {
+                        item.Högtyp = Högtyp.Kasthög;
+                        item.ÄrVisad = true;
+
+                        //Ta bort och lägg tillbaka kortet så att det hamnar i rätt position i listan
+                        Spelplan.Remove(item);
+                        Spelplan.Add(item);
+                    }
+                }
                 RensaBorders(kort);
             }
             // Om det inte finns kort i Tahög, flytta alla kort från Kasthög till Tahög
@@ -539,15 +601,7 @@ namespace Harpan
             }
         }
 
-        private void RadioButton_Checked(object sender, RoutedEventArgs e)
-        {
-            if (sender is RadioButton r && r.Tag is string tag)
-            {
-                _manuellförflyttning = tag == "1" ? true : false;
-                _automatiskförflyttning = tag == "2" ? true : false;
-                _automatisklösning = tag == "3" ? true : false;
-            }
-        }
+
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -598,6 +652,25 @@ namespace Harpan
                 }
             }
         }
+
+        private void RadioButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (sender is RadioButton r && r.Tag is string tag)
+            {
+                _manuellförflyttning = tag == "1" ? true : false;
+                _automatiskförflyttning = tag == "2" ? true : false;
+                _automatisklösning = tag == "3" ? true : false;
+            }
+        }
+
+        private void RadioButton_Checked_1(object sender, RoutedEventArgs e)
+        {
+            if (sender is RadioButton r && r.Tag is string tag)
+            {
+                TaEntre = tag == "1" ? true : false;
+                Orientation = tag == "1" ? Orientation.Vertical : Orientation.Horizontal; // Sätt orientering baserat på valt alternativ
+            }
+        }
     }
     // Konverterare för att visa ram på kort baserat på Visaram-egenskapen
     public class VisaRamConverter : IValueConverter
@@ -622,10 +695,8 @@ namespace Harpan
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values == null || values.Length < 2)
-            {
-                return null; 
-            }
+            if (values.Any(v => v == null || v == DependencyProperty.UnsetValue)) return null;
+
 
             var kort = values[0] as Spelkort;
             if (kort == null) return "pack://application:,,,/Spelkort/baksida.png"; // Default baksida om inget kort är satt
@@ -666,15 +737,14 @@ namespace Harpan
 
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values == null || values.Length < 2)
-            {
-                return null; // Or a default fallback image
-            }
+            if (values.Any(v => v == null || v == DependencyProperty.UnsetValue)) return null;
+
             var filter = values[0] as string;
+            var taen = (bool)values[2];
             Högtyp högtyp;
             Enum.TryParse(filter, out högtyp);
             var lista = values[1] as ObservableCollection<Spelkort>;
-            return lista.Where(x => x.Högtyp == högtyp).ToList();
+            return högtyp == Högtyp.Kasthög && !taen && lista.Where(x => x.Högtyp == högtyp && x.ÄrKort).ToList().Count() > 0 ? lista.Where(x => x.Högtyp == högtyp && x.ÄrKort).ToList() : lista.Where(x => x.Högtyp == högtyp).ToList();
         }
 
 
@@ -685,20 +755,128 @@ namespace Harpan
     }
 
     // Konverterare för att sätta marginal på kort baserat på Högtyp för att justera positionen i UI
-    public class MarginConverter : IValueConverter
+    public class MarginConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Any(v => v == null || v == DependencyProperty.UnsetValue)) return new Thickness(0);
+
+            var kort = values[0] as Spelkort;
+            var lista = values[1] as ObservableCollection<Spelkort>;
+            var taen = (bool)values[2];
+            if (kort == null || lista == null) return new Thickness(0);
+
+            if (kort.Högtyp == Högtyp.Kasthög)
+            {
+                if (!taen && kort.Högtyp == Högtyp.Kasthög && kort.ÄrKort)
+                {
+                    var kasthög = lista.Where(x => x.Högtyp == Högtyp.Kasthög && x.ÄrKort).ToList();
+                    if (kasthög.Count == 2 && kasthög.IndexOf(kort) >= kasthög.Count - 2) return new Thickness(0, -150, 0, 0);
+                    if (kasthög.Count > 2 && kasthög.IndexOf(kort) >= kasthög.Count - 3) return new Thickness(0, -150, 0, 0);
+                }
+                return new Thickness(0, -150, 0, 0); // Ingen marginal för Kasthög
+            }
+
+            if (kort.Högtyp == Högtyp.Tahög || kort.Högtyp == Högtyp.Hjärterhög
+                || kort.Högtyp == Högtyp.Spaderhög || kort.Högtyp == Högtyp.Ruterhög || kort.Högtyp == Högtyp.Klöverhög) return new Thickness(0, -150, 0, 0); // Ingen marginal för dessa högar
+            return new Thickness(0, -120, 0, 0);
+        }
+
+
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ItemsControlMarginConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var kort = value as Spelkort;
-            if (kort == null) return new Thickness(0);
-            if (kort.Högtyp == Högtyp.Tahög || kort.Högtyp == Högtyp.Kasthög || kort.Högtyp == Högtyp.Hjärterhög 
-                || kort.Högtyp == Högtyp.Spaderhög || kort.Högtyp == Högtyp.Ruterhög || kort.Högtyp == Högtyp.Klöverhög) return new Thickness(0, -150, 0, 0); // Ingen marginal för dessa högar
-            return new Thickness(0, -110, 0, 0);
+            if (value == null || value == DependencyProperty.UnsetValue) return new Thickness(0);
+            var typ = value as string ?? "";
+            return typ == "Kasthög" ? new Thickness(106, 150, 20, 0) : new Thickness(0, 150, 20, 0); // Returnera marginal för Kasthög, annars standard marginal
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }
-    } 
+    }
+
+    public class OrientationConverter : IMultiValueConverter
+    {
+
+        //public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        //{
+        //    if (value == null) return Orientation.Vertical;
+        //    var typ = value as string ?? "";
+        //    return typ == "Kasthög" ? Orientation.Horizontal : Orientation.Vertical; // Returnera horisontell orientering för Kasthög, annars vertikal
+        //}
+
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Any(v => v == null || v == DependencyProperty.UnsetValue)) return Orientation.Vertical;
+            var filter = values[0] as string;
+            Högtyp högtyp;
+
+            var taentre = (bool)values[1];
+            if (!Enum.TryParse(filter, out högtyp)) return Orientation.Vertical;
+
+            return högtyp == Högtyp.Kasthög && !taentre? Orientation.Horizontal : Orientation.Vertical; // Returnera horisontell orientering för Kasthög, annars vertikal
+        }
+
+        //public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ItemsControlWidthConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Any(v => v == null || v == DependencyProperty.UnsetValue)) return 136.0;
+            var filter = values[0] as string;
+            var taentre = (bool)values[2];
+            Högtyp högtyp;
+            
+            var lista = values[1] as ObservableCollection<Spelkort>;
+            if (!Enum.TryParse(filter, out högtyp) || lista == null) return 136.0;
+            var hög = lista.Where(x => x.Högtyp == högtyp && x.ÄrKort).ToList().Count();
+            return högtyp == Högtyp.Kasthög && !taentre ? (hög > 0 ? (double)(106.0 * hög + 30) : 136.0) : 136.0;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class WrapPanelMaxWidthConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Any(v => v == null || v == DependencyProperty.UnsetValue)) return 1200;
+            var filter = values[0] as string;
+            var taentre = (bool)values[2];
+            Högtyp högtyp;
+
+            var lista = values[1] as ObservableCollection<Spelkort>;
+            if (!Enum.TryParse(filter, out högtyp) || lista == null) return 1200;
+            var hög = lista.Where(x => x.Högtyp == högtyp && x.ÄrKort).ToList().Count() -1;
+            return högtyp == Högtyp.Kasthög && !taentre ? (hög > 0 ? (double)(1200 + hög * 26) : 1200.0) : 1200.0;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
