@@ -17,11 +17,11 @@ A Klondike solitaire card game built with C# and WPF. "Harpan" is Swedish for "S
 
 ```
 Harpan/
-├── MainWindow.xaml/.cs     # Game UI and interaction
-├── Spelkort.cs             # Card model (spelkort = playing card)
-├── HanteraKortlek.cs       # Deck management (hantera kortlek = manage deck)
-├── BindingProxy.cs         # WPF binding helper
-└── Spelkort/               # Card images (52 cards + suits + backs)
++-- MainWindow.xaml/.cs     # Game UI and interaction
++-- Spelkort.cs             # Card model (spelkort = playing card)
++-- HanteraKortlek.cs       # Deck management (hantera kortlek = manage deck)
++-- BindingProxy.cs         # WPF binding helper
++-- Spelkort/               # Card images (52 cards + suits + backs)
 ```
 
 ## How to Run
